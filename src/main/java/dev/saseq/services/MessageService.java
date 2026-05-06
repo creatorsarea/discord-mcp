@@ -2,6 +2,7 @@ package dev.saseq.services;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
@@ -372,8 +373,34 @@ public class MessageService {
                         }
                     }
 
+                    List<MessageEmbed> embeds = m.getEmbeds();
+                    if (!embeds.isEmpty()) {
+                        sb.append("\n  Embeds:");
+                        for (MessageEmbed embed : embeds) {
+                            sb.append("\n    - ").append(formatEmbedSummary(embed));
+                        }
+                    }
+
                     return sb.toString();
                 }).toList();
+    }
+
+    private String formatEmbedSummary(MessageEmbed embed) {
+        StringBuilder sb = new StringBuilder();
+        if (embed.getTitle() != null) sb.append("Title: ").append(embed.getTitle());
+        if (embed.getUrl() != null) sb.append(" (").append(embed.getUrl()).append(")");
+        if (embed.getAuthor() != null) sb.append(" | Author: ").append(embed.getAuthor().getName());
+        if (embed.getDescription() != null) sb.append(" | Description: ").append(embed.getDescription());
+        if (!embed.getFields().isEmpty()) {
+            sb.append(" | Fields:");
+            for (MessageEmbed.Field field : embed.getFields()) {
+                sb.append(" [").append(field.getName()).append(": ").append(field.getValue()).append("]");
+            }
+        }
+        if (embed.getImage() != null) sb.append(" | Image: ").append(embed.getImage().getUrl());
+        if (embed.getFooter() != null && embed.getFooter().getText() != null)
+            sb.append(" | Footer: ").append(embed.getFooter().getText());
+        return sb.isEmpty() ? "(empty embed)" : sb.toString();
     }
 
     private String formatFileSize(int bytes) {
